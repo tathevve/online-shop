@@ -26,7 +26,7 @@ const initialState = {
         {
             id: 3,
             image: tramvay,
-            name: 'Transportation type: Tramvay',
+            name: 'Transportation type: 570Tramvay',
             description: 'April 11, 2022',
             price: 570.00,
             count:1,
@@ -47,8 +47,7 @@ const appSlice = createSlice({
     }
 })
 
-export const { setItemsList } = appSlice.actions;
-export const { setBagItems } = appSlice.actions;
+export const { setItemsList,setBagItems } = appSlice.actions;
 
 export const selectItems = (state) => state.app.itemsList;
 export const selectBagItems = (state) => state.app.bagItems;

@@ -30,13 +30,17 @@ function Home() {
 
         const findedItem = bagItems.find((i) => i.id === item.id)
 
-        console.log(findedItem)
+
         if (findedItem) {
             const updatedData = bagItems.map((i) => {
-                return {
-                    ...i,
-                    count: i.count + 1,
-                    price: i.price * 2
+                if (i.id === findedItem.id) {
+                    return {
+                        ...i,
+                        count: i.count + 1,
+                        price: item.price * (i.count + 1)
+                    }
+                } else {
+                    return i
                 }
             })
             dispatch(setBagItems(updatedData))
