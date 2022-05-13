@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useMemo } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { addItemToBag, selectBagItems, selectItems, setBagItems } from '../../../redux/slicers/app';
+import { selectBagItems, selectItems, setBagItems } from '../../../redux/slicers/app';
 import Header from '../../shared/Header';
 import { makeStyles } from '@mui/styles';
 import { useState } from 'react';
-import TextField from '@mui/material/TextField';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -63,25 +62,20 @@ function Bag() {
     const styles = useStyles();
     const [cartItems, setCartItems] = useState([]);
     const dispatch = useDispatch();
-    const arr = [];
     const items = useSelector(selectItems);
     const [total, setTotal] = useState(0);
     const [rowTotal, setRowTotal] = useState(0);
 
     useEffect(() => {
         let total = 0;
-        let rowTotal = 0;
+
         cartItems.forEach(element => {
             const itemCount = bagItems.find(i => i.id === element.id)?.count;
 
             total += itemCount * element.price;
-            rowTotal = itemCount * element.price;
-
-            console.log(itemCount, 'cart')
 
         });
 
-        setRowTotal(rowTotal);
         setTotal(total);
     }, [cartItems, bagItems])
 
@@ -96,6 +90,21 @@ function Bag() {
 
 
 
+    useEffect(() => {
+        const updatedCount = cartItems.map((element) => {
+            const itemCount = bagItems.find(i => i.id === element.id)?.count;
+            return {
+                id:element.id,
+                rowTotal: itemCount * element.price
+            }
+
+        })
+
+        setRowTotal(updatedCount);
+
+    }, [cartItems, bagItems])
+
+
     const changeQuantity = (item, typeOfOperation) => {
 
         const updatedCount = bagItems.map((i) => {
@@ -104,20 +113,18 @@ function Bag() {
                     return {
                         ...i,
                         count: i.count + 1,
-                        price: i.price + arr[item.id - 1]
+
                     }
                 } else if (typeOfOperation === 'minus') {
                     if (i.count - 1 <= 0) {
                         return {
                             ...i,
-                            count: 0,
-                            price: 0
+                            count: 0
                         }
                     } else {
                         return {
                             ...i,
                             count: i.count - 1,
-                            price: i.price - arr[item.id - 1]
 
                         }
                     }
@@ -136,7 +143,18 @@ function Bag() {
 
     }
 
+    useEffect(() => {
+        const removedItemsId = bagItems.find((i) => i.count === 0)?.id;
+        if (removedItemsId) {
+            const removedItem = cartItems.filter(p => p.id !== removedItemsId);
+            setCartItems(removedItem)
+        }
 
+    }, [bagItems])
+
+    const checkRowTotal = useCallback((id) => {
+        return rowTotal?.length > 0 && rowTotal.find((item) => item.id === id)?.rowTotal;
+    },[rowTotal])
 
 
     return (
@@ -167,21 +185,21 @@ function Bag() {
                 </div>
                 <div className={styles.countbagEachItem}>
                     {
-                        bagItems.length > 0 && bagItems.map((item) => (
-                            <div key={item.id} className={styles.countAndTotal}>
+                        bagItems.length > 0 && bagItems.map((item) => {
 
-
-                                <div>
-                                    <p>
-                                        <button onClick={() => changeQuantity(item, 'minus')}>-</button>
-                                        {item.count}
-                                        <button onClick={() => changeQuantity(item, 'plus')}>+</button>
-                                    </p>
+                            return item.count > 0 ? (
+                                <div key={item.id} className={styles.countAndTotal}>
+                                    <div>
+                                        <p>
+                                            <button onClick={() => changeQuantity(item, 'minus')}>-</button>
+                                            {item.count}
+                                            <button onClick={() => changeQuantity(item, 'plus')}>+</button>
+                                        </p>
+                                    </div>
+                                    <div><p>{checkRowTotal(item.id)}</p></div>
                                 </div>
-
-                                <div><p>{rowTotal}</p></div>
-                            </div>
-                        ))
+                            ) : null
+                        })
                     }
                 </div>
 

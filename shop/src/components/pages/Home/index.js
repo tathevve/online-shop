@@ -1,6 +1,6 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { addItemToBag, selectBagItems, selectItems } from '../../../redux/slicers/app'
+import { addItemToBag, selectItems } from '../../../redux/slicers/app'
 import Header from '../../shared/Header';
 import AddIcon from '@mui/icons-material/Add';
 import Button from '@mui/material/Button';
@@ -19,36 +19,7 @@ const useStyles = makeStyles((theme) => ({
 function Home() {
     const items = useSelector(selectItems);
     const styles = useStyles();
-    const bagItems = useSelector(selectBagItems);
     const dispatch = useDispatch();
-
-
-
-    // const addToBagHandler = (item) => {
-    //     const findedItem = bagItems.find((i) => i.id === item.id)
-
-    //     if (findedItem) {
-    //         const updatedData = bagItems.map((i) => {
-    //             if (i.id === findedItem.id) {
-    //                 return {
-    //                     ...i,
-    //                     count: i.count + 1,
-    //                     price: item.price * (i.count + 1)
-    //                 }
-    //             } else {
-    //                 return i
-    //             }
-    //         })
-    //         dispatch(setBagItems(updatedData))
-
-    //     } else {
-    //         dispatch(setBagItems([...bagItems, item]))
-
-    //     }
-
-
-    // }
-
 
     return (
         <div>
