@@ -46,7 +46,6 @@ const appSlice = createSlice({
             }else {
                 state.bagItems[bagItemIndex].count ++ 
             }
-
         },
         setItemsList(state, { payload }) {
             state.itemsList = payload;

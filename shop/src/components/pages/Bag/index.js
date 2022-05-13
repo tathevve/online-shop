@@ -4,6 +4,7 @@ import { selectBagItems, selectItems, setBagItems } from '../../../redux/slicers
 import Header from '../../shared/Header';
 import { makeStyles } from '@mui/styles';
 import { useState } from 'react';
+import { TextField } from '@mui/material';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -65,6 +66,9 @@ function Bag() {
     const items = useSelector(selectItems);
     const [total, setTotal] = useState(0);
     const [rowTotal, setRowTotal] = useState(0);
+    const [value, setValue] = useState(bagItems);
+
+
 
     useEffect(() => {
         let total = 0;
@@ -94,7 +98,7 @@ function Bag() {
         const updatedCount = cartItems.map((element) => {
             const itemCount = bagItems.find(i => i.id === element.id)?.count;
             return {
-                id:element.id,
+                id: element.id,
                 rowTotal: itemCount * element.price
             }
 
@@ -105,48 +109,92 @@ function Bag() {
     }, [cartItems, bagItems])
 
 
-    const changeQuantity = (item, typeOfOperation) => {
 
-        const updatedCount = bagItems.map((i) => {
-            if (i.id === item.id) {
-                if (typeOfOperation === 'plus') {
-                    return {
-                        ...i,
-                        count: i.count + 1,
 
-                    }
-                } else if (typeOfOperation === 'minus') {
-                    if (i.count - 1 <= 0) {
-                        return {
-                            ...i,
-                            count: 0
-                        }
-                    } else {
-                        return {
-                            ...i,
-                            count: i.count - 1,
+    const changeQuantity = (e, id) => {
 
-                        }
-                    }
+        const newValue = valueOfInput(e, id)
+        console.log(newValue);
 
-                }
+        // setValue(newValue)
+        // setValue(e)  
+        // dispatch(setBagItems(e))
 
-            } else {
-                return {
-                    ...i
-                }
-            }
+        // const updatedCount = bagItems.map((i) => {
+        //     if (i.id === item.id) {
+        //         //setValue(e)
+        //         return {
+        //             ...i,
+        //             count:e
+        //         }
+        //     }
+        // })
 
-        })
+        // const updatedCount = bagItems.map((i) => {
+        //     if (i.id === item.id) {
+        //         if (typeOfOperation === 'plus') {
+        //             return {
+        //                 ...i,
+        //                 count: i.count + 1,
 
-        dispatch(setBagItems(updatedCount));
+        //             }
+        //         } else if (typeOfOperation === 'minus') {
+        //             if (i.count - 1 <= 0) {
+        //                 return {
+        //                     ...i,
+        //                     count: 0
+        //                 }
+        //             } else {
+        //                 return {
+        //                     ...i,
+        //                     count: i.count - 1,
+
+        //                 }
+        //             }
+        //         }
+        //     } else {
+        //         return {
+        //             ...i
+        //         }
+        //     }
+
+        // })
+
+        // dispatch(setBagItems(updatedCount));
 
     }
 
+    const valueOfInput = useCallback((e, id) => {
+        // console.log(e)
+
+        //  console.log(id)
+        const newCount = bagItems.map((item) => {
+            if (item.id === id) {
+                return {
+                    ...item,
+                    count: parseInt(e)
+                }
+            } else {
+                return {
+                    ...item
+                }
+            }
+        })
+
+        console.log(newCount,'newCount')
+        dispatch(setBagItems(newCount))
+
+    }, [bagItems])
+
+
+
+    
     useEffect(() => {
         const removedItemsId = bagItems.find((i) => i.count === 0)?.id;
+        console.log(removedItemsId,'removedItemsId')
         if (removedItemsId) {
             const removedItem = cartItems.filter(p => p.id !== removedItemsId);
+            console.log(removedItem, 'removedItemFilter')
             setCartItems(removedItem)
         }
 
@@ -154,9 +202,10 @@ function Bag() {
 
     const checkRowTotal = useCallback((id) => {
         return rowTotal?.length > 0 && rowTotal.find((item) => item.id === id)?.rowTotal;
-    },[rowTotal])
+    }, [rowTotal])
 
-
+    console.log(cartItems, 'cartItem');
+    
     return (
         <div>
             <Header />
@@ -171,9 +220,11 @@ function Bag() {
                 <div className={styles.bagEachItem}>
                     {
                         cartItems.length > 0 && cartItems.map((item) => (
+
+
                             <div key={item.id} className={styles.descriptionArea}>
                                 <div className={styles.itemDescription}>
-                                    <img src={item.image} style={{ height: '250px' }} />
+                                    <img src={item.image} alt="image" style={{ height: '250px' }} />
                                     <p>{item.name}</p>
                                     <p>{item.description}</p>
 
@@ -191,9 +242,19 @@ function Bag() {
                                 <div key={item.id} className={styles.countAndTotal}>
                                     <div>
                                         <p>
-                                            <button onClick={() => changeQuantity(item, 'minus')}>-</button>
-                                            {item.count}
-                                            <button onClick={() => changeQuantity(item, 'plus')}>+</button>
+                                            <TextField
+                                                id="outlined-number"
+                                                label="Number"
+                                                type="number"
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                                onChange={(e) => valueOfInput(e.target.value, item.id)}
+
+                                                value={item.count}
+
+                                            />
+
                                         </p>
                                     </div>
                                     <div><p>{checkRowTotal(item.id)}</p></div>

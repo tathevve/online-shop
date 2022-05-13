@@ -28,7 +28,7 @@ function Home() {
                 {
                     items?.length > 0 && items.map((item) => (
                         <div key={item.id}>
-                            <img src={item.image} style={{ height: '250px' }} />
+                            <img src={item.image}  alt="image" style={{ height: '250px' }} />
                             <p>{item.name}</p>
                             <p>{item.description}</p>
                             <p>{item.price}</p>
