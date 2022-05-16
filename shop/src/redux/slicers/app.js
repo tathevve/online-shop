@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import tramvay from "../../assets/images/tramvay.jpg"
 import tram2 from "../../assets/images/tram2.jpg"
+import { nanoid } from "nanoid";
 
 const name = 'APP'
 
@@ -8,21 +9,21 @@ const initialState = {
     bagItems: [],
     itemsList: [
         {
-            id: 1,
+            id: nanoid(),
             image: tramvay,
             name: 'Transportation type: Tramvay',
             description: 'April 11, 2022',
             price: 100,
         },
         {
-            id: 2,
+            id: nanoid(),
             image: tram2,
             name: 'Transportation type: Tramvay',
             description: 'April 11, 2022',
             price: 300.00,
         },
         {
-            id: 3,
+            id: nanoid(),
             image: tramvay,
             name: 'Transportation type: 570Tramvay',
             description: 'April 11, 2022',

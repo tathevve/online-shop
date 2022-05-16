@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
-import { selectBagItems, selectItems, setBagItems } from '../../../redux/slicers/app';
+import { useSelector } from 'react-redux';
+import { selectBagItems, selectItems } from '../../../redux/slicers/app';
 import Header from '../../shared/Header';
 import { makeStyles } from '@mui/styles';
 import { useState } from 'react';
@@ -47,12 +47,16 @@ const useStyles = makeStyles((theme) => ({
         width: '50%!important'
     },
     countbagEachItem: {
-        width: '40%'
+        width: '31%'
     },
     countAndTotal: {
         display: 'flex',
         justifyContent: 'space-between',
         height: '250px'
+    },
+    priceItem: {
+        width:'29%',
+        textAlign:'center'
     }
 
 
@@ -62,11 +66,9 @@ function Bag() {
     const bagItems = useSelector(selectBagItems);
     const styles = useStyles();
     const [cartItems, setCartItems] = useState([]);
-    const dispatch = useDispatch();
     const items = useSelector(selectItems);
     const [total, setTotal] = useState(0);
     const [rowTotal, setRowTotal] = useState(0);
-    const [value, setValue] = useState(bagItems);
 
 
 
@@ -74,9 +76,7 @@ function Bag() {
         let total = 0;
 
         cartItems.forEach(element => {
-            const itemCount = bagItems.find(i => i.id === element.id)?.count;
-
-            total += itemCount * element.price;
+            total += element.count * element.price;
 
         });
 
@@ -86,8 +86,14 @@ function Bag() {
 
     useEffect(() => {
         if (bagItems?.length && items?.length) {
-            const bagItemIds = bagItems.map(i => i.id);
-            const result = items.filter(i => bagItemIds.includes(i.id));
+            const bagItemUpdatedList = bagItems.map(i => i);
+            const result = items.map(i => {
+                return {
+                    ...i,
+                    id: bagItemUpdatedList.find((m) => m.id === i.id)?.id,
+                    count: bagItemUpdatedList.find((m) => m.id === i.id)?.count,
+                }
+            });
             setCartItems(result);
         }
     }, [bagItems?.length, items?.length])
@@ -96,10 +102,9 @@ function Bag() {
 
     useEffect(() => {
         const updatedCount = cartItems.map((element) => {
-            const itemCount = bagItems.find(i => i.id === element.id)?.count;
             return {
                 id: element.id,
-                rowTotal: itemCount * element.price
+                rowTotal: element.count * element.price
             }
 
         })
@@ -111,68 +116,13 @@ function Bag() {
 
 
 
-    const changeQuantity = (e, id) => {
 
-        const newValue = valueOfInput(e, id)
-        console.log(newValue);
-
-        // setValue(newValue)
-        // setValue(e)  
-        // dispatch(setBagItems(e))
-
-        // const updatedCount = bagItems.map((i) => {
-        //     if (i.id === item.id) {
-        //         //setValue(e)
-        //         return {
-        //             ...i,
-        //             count:e
-        //         }
-        //     }
-        // })
-
-        // const updatedCount = bagItems.map((i) => {
-        //     if (i.id === item.id) {
-        //         if (typeOfOperation === 'plus') {
-        //             return {
-        //                 ...i,
-        //                 count: i.count + 1,
-
-        //             }
-        //         } else if (typeOfOperation === 'minus') {
-        //             if (i.count - 1 <= 0) {
-        //                 return {
-        //                     ...i,
-        //                     count: 0
-        //                 }
-        //             } else {
-        //                 return {
-        //                     ...i,
-        //                     count: i.count - 1,
-
-        //                 }
-        //             }
-        //         }
-        //     } else {
-        //         return {
-        //             ...i
-        //         }
-        //     }
-
-        // })
-
-        // dispatch(setBagItems(updatedCount));
-
-    }
-
-    const valueOfInput = useCallback((e, id) => {
-        // console.log(e)
-
-        //  console.log(id)
-        const newCount = bagItems.map((item) => {
+    const valueOfInput = useCallback((value, id) => {
+        const updatedList = cartItems.map((item) => {
             if (item.id === id) {
                 return {
                     ...item,
-                    count: parseInt(e)
+                    count: parseInt(value)
                 }
             } else {
                 return {
@@ -180,32 +130,27 @@ function Bag() {
                 }
             }
         })
+        setCartItems(updatedList)
 
-        console.log(newCount,'newCount')
-        dispatch(setBagItems(newCount))
-
-    }, [bagItems])
+    }, [cartItems])
 
 
 
-    
+
     useEffect(() => {
-        const removedItemsId = bagItems.find((i) => i.count === 0)?.id;
-        console.log(removedItemsId,'removedItemsId')
+        const removedItemsId = cartItems.find((i) => i.count === 0)?.id;
         if (removedItemsId) {
             const removedItem = cartItems.filter(p => p.id !== removedItemsId);
-            console.log(removedItem, 'removedItemFilter')
             setCartItems(removedItem)
         }
 
-    }, [bagItems])
+    }, [cartItems])
 
     const checkRowTotal = useCallback((id) => {
         return rowTotal?.length > 0 && rowTotal.find((item) => item.id === id)?.rowTotal;
     }, [rowTotal])
 
-    console.log(cartItems, 'cartItem');
-    
+    console.log(cartItems,'cartItems')
     return (
         <div>
             <Header />
@@ -229,40 +174,46 @@ function Bag() {
                                     <p>{item.description}</p>
 
                                 </div>
-                                <div>{item.price}</div>
+                                <div className={styles.priceItem}>{item.price}</div>
+
+                                <div className={styles.countbagEachItem}>
+                                    <div className={styles.countAndTotal}>
+                                        <TextField
+                                            id="outlined-number"
+                                            label="Number"
+                                            type="number"
+                                            InputLabelProps={{
+                                                shrink: true,
+                                            }}
+                                            onChange={(e) => valueOfInput(e.target.value, item.id)}
+
+                                            value={item.count}
+
+                                        />
+                                        <div>{checkRowTotal(item.id)}</div>
+
+                                    </div>
+                                </div>
+
                             </div>
                         ))
                     }
                 </div>
-                <div className={styles.countbagEachItem}>
+                {/* 
                     {
                         bagItems.length > 0 && bagItems.map((item) => {
 
                             return item.count > 0 ? (
-                                <div key={item.id} className={styles.countAndTotal}>
+                                
                                     <div>
-                                        <p>
-                                            <TextField
-                                                id="outlined-number"
-                                                label="Number"
-                                                type="number"
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                                onChange={(e) => valueOfInput(e.target.value, item.id)}
-
-                                                value={item.count}
-
-                                            />
-
-                                        </p>
+                                            
                                     </div>
-                                    <div><p>{checkRowTotal(item.id)}</p></div>
+                                   
                                 </div>
                             ) : null
                         })
                     }
-                </div>
+                </div> */}
 
 
 
