@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react'
-import { useSelector } from 'react-redux';
-import { selectBagItems, selectItems } from '../../../redux/slicers/app';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectBagItems, selectItems, setBagItems } from '../../../redux/slicers/app';
 import Header from '../../shared/Header';
 import { makeStyles } from '@mui/styles';
 import { useState } from 'react';
@@ -55,8 +55,8 @@ const useStyles = makeStyles((theme) => ({
         height: '250px'
     },
     priceItem: {
-        width:'29%',
-        textAlign:'center'
+        width: '29%',
+        textAlign: 'center'
     }
 
 
@@ -68,6 +68,7 @@ function Bag() {
     const [cartItems, setCartItems] = useState([]);
     const items = useSelector(selectItems);
     const [total, setTotal] = useState(0);
+    const dispatch = useDispatch();
     const [rowTotal, setRowTotal] = useState(0);
 
 
@@ -87,14 +88,22 @@ function Bag() {
     useEffect(() => {
         if (bagItems?.length && items?.length) {
             const bagItemUpdatedList = bagItems.map(i => i);
+            const bagItemUpdatedIds = bagItems.map(i => i.id);         
+
             const result = items.map(i => {
                 return {
                     ...i,
                     id: bagItemUpdatedList.find((m) => m.id === i.id)?.id,
                     count: bagItemUpdatedList.find((m) => m.id === i.id)?.count,
                 }
+            }).filter((j) => {
+                if(bagItemUpdatedIds.includes(j.id)) {
+                    return j
+                }
             });
-            setCartItems(result);
+
+               setCartItems(result);
+
         }
     }, [bagItems?.length, items?.length])
 
@@ -141,7 +150,11 @@ function Bag() {
         const removedItemsId = cartItems.find((i) => i.count === 0)?.id;
         if (removedItemsId) {
             const removedItem = cartItems.filter(p => p.id !== removedItemsId);
-            setCartItems(removedItem)
+
+            const removedItemFromBag = bagItems.filter((i) => i.id !== removedItemsId);
+
+            setCartItems(removedItem);
+            dispatch(setBagItems(removedItemFromBag));
         }
 
     }, [cartItems])
@@ -150,7 +163,7 @@ function Bag() {
         return rowTotal?.length > 0 && rowTotal.find((item) => item.id === id)?.rowTotal;
     }, [rowTotal])
 
-    console.log(cartItems,'cartItems')
+
     return (
         <div>
             <Header />
@@ -199,23 +212,6 @@ function Bag() {
                         ))
                     }
                 </div>
-                {/* 
-                    {
-                        bagItems.length > 0 && bagItems.map((item) => {
-
-                            return item.count > 0 ? (
-                                
-                                    <div>
-                                            
-                                    </div>
-                                   
-                                </div>
-                            ) : null
-                        })
-                    }
-                </div> */}
-
-
 
             </div>
 
